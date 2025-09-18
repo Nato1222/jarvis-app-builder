@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-jose
+passlib[bcrypt]
+python-dotenv
+pytrends
+requests
+beautifulsoup4
+groq
+httpx==0.27.2
+openai>=1.40.0,<2

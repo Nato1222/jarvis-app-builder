@@ -1,0 +1,63 @@
+name: Build and Deploy App
+
+on:
+  push:
+    branches: [ main, apps/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        cd generator
+        npm ci
+        
+    - name: Build generator
+      run: |
+        cd generator
+        npm run build
+        
+    - name: Setup Expo CLI
+      run: |
+        npm install -g @expo/cli eas-cli
+        
+    - name: Configure EAS
+      run: |
+        echo "EXPO_TOKEN=${{ secrets.EXPO_TOKEN }}" >> $GITHUB_ENV
+        
+    - name: Build for Android
+      if: contains(github.ref, 'apps/')
+      run: |
+        cd ${{ github.workspace }}/generated-apps/app-${{ github.ref_name }}
+        eas build --platform android --non-interactive
+        
+    - name: Build for iOS
+      if: contains(github.ref, 'apps/')
+      run: |
+        cd ${{ github.workspace }}/generated-apps/app-${{ github.ref_name }}
+        eas build --platform ios --non-interactive
+        
+    - name: Submit to Play Store
+      if: contains(github.ref, 'apps/') && success()
+      run: |
+        cd ${{ github.workspace }}/generated-apps/app-${{ github.ref_name }}
+        eas submit --platform android --non-interactive
+        
+    - name: Submit to App Store
+      if: contains(github.ref, 'apps/') && success()
+      run: |
+        cd ${{ github.workspace }}/generated-apps/app-${{ github.ref_name }}
+        eas submit --platform ios --non-interactive

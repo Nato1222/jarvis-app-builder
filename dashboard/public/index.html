@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis App Builder Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div x-data="appBuilder()" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Jarvis App Builder</h1>
+            <p class="text-gray-600">Create mobile apps with AI-powered features in minutes</p>
+        </div>
+
+        <!-- App Generation Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Create New App</h2>
+            
+            <form @submit.prevent="generateApp" class="space-y-6">
+                <!-- App Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">App Name</label>
+                        <input 
+                            x-model="form.appName" 
+                            type="text" 
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="My Awesome App"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">App Slug</label>
+                        <input 
+                            x-model="form.appSlug" 
+                            type="text" 
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="my-awesome-app"
+                        >
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bundle ID (iOS)</label>
+                        <input 
+                            x-model="form.bundleId" 
+                            type="text" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="com.jarvis.my-awesome-app"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Package Name (Android)</label>
+                        <input 
+                            x-model="form.packageName" 
+                            type="text" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="com.jarvis.my_awesome_app"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea 
+                        x-model="form.description" 
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Describe what your app does..."
+                    ></textarea>
+                </div>
+
+                <!-- Module Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Choose Feature Module</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="module in modules" :key="module.id">
+                            <div 
+                                @click="selectModule(module)"
+                                :class="form.module?.id === module.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'"
+                                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors"
+                            >
+                                <div class="text-2xl mb-2" x-text="module.icon"></div>
+                                <h3 class="font-semibold text-gray-800" x-text="module.name"></h3>
+                                <p class="text-sm text-gray-600 mt-1" x-text="module.description"></p>
+                                <div class="mt-2">
+                                    <span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded" x-text="module.category"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="flex justify-end">
+                    <button 
+                        type="submit"
+                        :disabled="!form.module || loading"
+                        :class="loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'"
+                        class="px-6 py-2 text-white font-medium rounded-md transition-colors"
+                    >
+                        <span x-show="!loading">Generate App</span>
+                        <span x-show="loading">Generating...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Generated Apps -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Generated Apps</h2>
+            <div x-show="generatedApps.length === 0" class="text-gray-500 text-center py-8">
+                No apps generated yet. Create your first app above!
+            </div>
+            <div x-show="generatedApps.length > 0" class="space-y-4">
+                <template x-for="app in generatedApps" :key="app.appId">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-gray-800" x-text="app.appName"></h3>
+                                <p class="text-sm text-gray-600" x-text="app.description"></p>
+                                <p class="text-xs text-gray-500 mt-1">Module: <span x-text="app.moduleName"></span></p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button 
+                                    @click="downloadApp(app)"
+                                    class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                                >
+                                    Download
+                                </button>
+                                <button 
+                                    @click="viewApp(app)"
+                                    class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                >
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function appBuilder() {
+            return {
+                modules: [],
+                form: {
+                    appName: '',
+                    appSlug: '',
+                    bundleId: '',
+                    packageName: '',
+                    description: '',
+                    module: null
+                },
+                loading: false,
+                generatedApps: [],
+
+                async init() {
+                    await this.loadModules();
+                    this.loadGeneratedApps();
+                },
+
+                async loadModules() {
+                    try {
+                        const response = await fetch('/api/modules');
+                        this.modules = await response.json();
+                    } catch (error) {
+                        console.error('Failed to load modules:', error);
+                    }
+                },
+
+                selectModule(module) {
+                    this.form.module = module;
+                    // Auto-fill some fields based on module
+                    if (!this.form.appName) {
+                        this.form.appName = module.name;
+                    }
+                    if (!this.form.appSlug) {
+                        this.form.appSlug = module.id;
+                    }
+                },
+
+                async generateApp() {
+                    if (!this.form.module) return;
+
+                    this.loading = true;
+                    try {
+                        const response = await fetch('/api/generate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.form)
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            this.generatedApps.unshift({
+                                appId: result.appId,
+                                appName: this.form.appName,
+                                description: this.form.description,
+                                moduleName: this.form.module.name,
+                                repoUrl: result.repoUrl,
+                                createdAt: new Date().toISOString()
+                            });
+                            this.saveGeneratedApps();
+                            this.resetForm();
+                            alert('App generated successfully!');
+                        } else {
+                            alert('Failed to generate app: ' + result.error);
+                        }
+                    } catch (error) {
+                        console.error('Generation error:', error);
+                        alert('Failed to generate app');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                resetForm() {
+                    this.form = {
+                        appName: '',
+                        appSlug: '',
+                        bundleId: '',
+                        packageName: '',
+                        description: '',
+                        module: null
+                    };
+                },
+
+                downloadApp(app) {
+                    if (app.repoUrl) {
+                        window.open(app.repoUrl, '_blank');
+                    }
+                },
+
+                viewApp(app) {
+                    if (app.repoUrl) {
+                        window.open(app.repoUrl, '_blank');
+                    }
+                },
+
+                loadGeneratedApps() {
+                    const saved = localStorage.getItem('generatedApps');
+                    if (saved) {
+                        this.generatedApps = JSON.parse(saved);
+                    }
+                },
+
+                saveGeneratedApps() {
+                    localStorage.setItem('generatedApps', JSON.stringify(this.generatedApps));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

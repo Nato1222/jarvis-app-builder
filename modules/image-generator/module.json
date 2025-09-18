@@ -1,0 +1,49 @@
+{
+  "id": "image-generator",
+  "name": "AI Image Generator",
+  "description": "Generate stunning images from text descriptions using AI",
+  "version": "1.0.0",
+  "category": "AI/Image",
+  "inputs": [
+    {
+      "name": "prompt",
+      "type": "string",
+      "label": "Image description",
+      "required": true,
+      "placeholder": "A beautiful sunset over mountains..."
+    },
+    {
+      "name": "style",
+      "type": "string",
+      "label": "Art style",
+      "required": false,
+      "defaultValue": "realistic",
+      "options": ["realistic", "cartoon", "anime", "oil painting", "watercolor"]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "imageUrl",
+      "type": "string",
+      "label": "Generated Image URL"
+    }
+  ],
+  "routes": [
+    {
+      "screen": "Home",
+      "component": "ImageGeneratorComponent"
+    }
+  ],
+  "dependencies": [
+    "openai-client@^1.0.0"
+  ],
+  "api": {
+    "endpoint": "https://api.jarvis.local/image-generate",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "icon": "🎨",
+  "tags": ["ai", "image", "generation", "art"]
+}

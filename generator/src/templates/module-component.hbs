@@ -1,0 +1,124 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+
+interface {{MODULE_COMPONENT}}Props {
+  // Add any props specific to this module
+}
+
+export const {{MODULE_COMPONENT}}: React.FC<{{MODULE_COMPONENT}}Props> = () => {
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!input.trim()) {
+      Alert.alert('Error', 'Please enter some text');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Call the module's API endpoint
+      const response = await fetch('{{API_ENDPOINT}}', {
+        method: '{{API_METHOD}}',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          {{#each INPUTS}}
+          {{name}}: input,
+          {{/each}}
+        }),
+      });
+
+      const data = await response.json();
+      setOutput(data.{{#each OUTPUTS}}{{name}}{{/each}} || data.result || 'No response received');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to process request');
+      console.error('API Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Enter your text:</Text>
+      <TextInput
+        style={styles.input}
+        value={input}
+        onChangeText={setInput}
+        placeholder="Type something here..."
+        multiline
+        numberOfLines={4}
+      />
+      
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? 'Processing...' : 'Process'}
+        </Text>
+      </TouchableOpacity>
+
+      {output ? (
+        <View style={styles.outputContainer}>
+          <Text style={styles.outputLabel}>Result:</Text>
+          <Text style={styles.output}>{output}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    textAlignVertical: 'top',
+    marginBottom: 16,
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  outputContainer: {
+    flex: 1,
+  },
+  outputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  output: {
+    fontSize: 16,
+    lineHeight: 24,
+    backgroundColor: '#f5f5f5',
+    padding: 12,
+    borderRadius: 8,
+  },
+});

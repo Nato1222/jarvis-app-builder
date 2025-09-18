@@ -1,0 +1,41 @@
+export interface {{MODULE_NAME}}Input {
+  {{#each INPUTS}}
+  {{name}}: {{type}};
+  {{/each}}
+}
+
+export interface {{MODULE_NAME}}Output {
+  {{#each OUTPUTS}}
+  {{name}}: {{type}};
+  {{/each}}
+}
+
+export class {{MODULE_NAME}}Service {
+  private apiEndpoint: string;
+
+  constructor(apiEndpoint: string = '{{API_ENDPOINT}}') {
+    this.apiEndpoint = apiEndpoint;
+  }
+
+  async process(input: {{MODULE_NAME}}Input): Promise<{{MODULE_NAME}}Output> {
+    try {
+      const response = await fetch(this.apiEndpoint, {
+        method: '{{API_METHOD}}',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data as {{MODULE_NAME}}Output;
+    } catch (error) {
+      console.error('{{MODULE_NAME}}Service error:', error);
+      throw error;
+    }
+  }
+}

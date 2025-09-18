@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@tensorflow/tfjs-react-native": "^1.0.0"
+  }
+}

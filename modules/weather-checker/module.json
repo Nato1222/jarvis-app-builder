@@ -1,0 +1,56 @@
+{
+  "id": "weather-checker",
+  "name": "Weather Checker",
+  "description": "Get current weather information for any location",
+  "version": "1.0.0",
+  "category": "Utility",
+  "inputs": [
+    {
+      "name": "location",
+      "type": "string",
+      "label": "City or Location",
+      "required": true,
+      "placeholder": "New York, London, Tokyo..."
+    },
+    {
+      "name": "units",
+      "type": "string",
+      "label": "Temperature Units",
+      "required": false,
+      "defaultValue": "metric",
+      "options": ["metric", "imperial", "kelvin"]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "temperature",
+      "type": "number",
+      "label": "Temperature"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "label": "Weather Description"
+    },
+    {
+      "name": "humidity",
+      "type": "number",
+      "label": "Humidity %"
+    }
+  ],
+  "routes": [
+    {
+      "screen": "Home",
+      "component": "WeatherCheckerComponent"
+    }
+  ],
+  "dependencies": [
+    "axios@^1.6.0"
+  ],
+  "api": {
+    "endpoint": "https://api.openweathermap.org/data/2.5/weather",
+    "method": "GET"
+  },
+  "icon": "🌤️",
+  "tags": ["weather", "utility", "location", "forecast"]
+}

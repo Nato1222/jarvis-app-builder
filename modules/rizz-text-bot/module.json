@@ -1,0 +1,41 @@
+{
+  "id": "rizz-text-bot",
+  "name": "Rizz — Smart Reply",
+  "description": "AI-powered text response generator that creates engaging and witty replies",
+  "version": "1.0.0",
+  "category": "AI/Text",
+  "inputs": [
+    {
+      "name": "promptText",
+      "type": "string",
+      "label": "Enter your text",
+      "required": true,
+      "placeholder": "Type something here..."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "reply",
+      "type": "string",
+      "label": "AI Response"
+    }
+  ],
+  "routes": [
+    {
+      "screen": "Home",
+      "component": "RizzComponent"
+    }
+  ],
+  "dependencies": [
+    "openai-client@^1.0.0"
+  ],
+  "api": {
+    "endpoint": "https://api.jarvis.local/rizz",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "icon": "💬",
+  "tags": ["ai", "text", "chat", "response"]
+}
